@@ -1,4 +1,5 @@
 var mysql = require('mysql');
+var config = require('./config')
 
 var state = {
     pool :  null,
@@ -8,11 +9,11 @@ var state = {
 exports.connect = function(mode, done) {
     state.pool = mysql.createPool({
         connectionLimit : 100,
-        host : 'localhost',
-        user : 'root',
-        password : '',
+        host : config.database.host,
+        user : config.database.user,
+        password : config.database.password,
         database : mode === exports.MODE_PRODUCTION ? 'anilist_schema' : 'anilist_test'
-    })
+    });
     state.mode = mode;
     done();
 }
