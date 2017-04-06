@@ -1,6 +1,7 @@
 var express = require('express')
 var db = require('./mongodb')
 var config = require('./config')
+var router = express.Router()
 
 var app = express()
 
@@ -31,11 +32,24 @@ app.get('/', function(req, res) {
 //     });
 // }
 
+app.get('/test', function(req, res) {
+    var collection = db.get().collection('test')
+    collection.find().toArray(function(err, docs) {
+        res.json({test : docs})
+    })
+})
+
 db.connect(config.mongo.url, function(err) {
     if (err) {
         console.log("Error")
         process.exit(1)
     } else {
+        // var collection = db.get().collection('test');
+        // collection.insertMany([
+        //     {test1 : 1}, {test2 : 2}, {test3 : 3}
+        // ], function(err, result) {
+        //     console.log('Inserted documents');
+        // });
         app.listen(config.server.port, function() {
             console.log("Listening on port " + config.server.port)
         });
