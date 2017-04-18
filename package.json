@@ -9,10 +9,11 @@
   "author": "Robert Borowicz",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.17.1",
+    "cors": "^2.8.3",
+    "ejs": "^2.5.6",
     "express": "^4.15.2",
-    "jade": "^1.11.0",
     "mongodb": "^2.2.25",
-    "mysql": "^2.13.0",
-    "pug": "^2.0.0-beta11"
+    "mysql": "^2.13.0"
   }
 }
