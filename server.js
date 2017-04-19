@@ -4,7 +4,6 @@ const config = require('./config')
 
 const express = require('express')
 const bodyParser = require('body-parser')
-const cors = require('cors')
 
 const index = require('./app/routes/index')
 const api = require('./app/routes/api')
@@ -14,11 +13,10 @@ const app = express()
 const port = 8080;
 
 // View engine
-app.set('views', __dirname + '/public/views');
-app.set('view engine', 'ejs');
-app.engine('html', require('ejs').renderFile);
+// app.set('views', __dirname + '/public');
+// app.set('view engine', 'ejs');
+// app.engine('html', require('ejs').renderFile);
 
-app.use(cors)
 app.use(express.static(__dirname + '/public'));
 
 // Body Parser

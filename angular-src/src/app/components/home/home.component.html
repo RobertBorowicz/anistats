@@ -1,0 +1,11 @@
+<div class="jumbotron">
+  <div class="container">
+    <h1>Welcome to AniStats</h1>
+    <form (submit)="onNameSubmit()">
+        <div class="form-group">
+            <input type="text" name="username" [(ngModel)]="username" placeholder="Enter username..." class="form-control">
+        </div>
+        <button type="submit" class="btn btn-success">Get Stats!</button>
+    </form>
+  </div>
+</div>
