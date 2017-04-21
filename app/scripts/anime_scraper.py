@@ -298,9 +298,12 @@ class AnimeDatabase():
                 d['Episodes'], d['Duration'], d['Score'], d['Rating'],
                 d['Members'], d['Favorites'])
 
+        print d["Timestamp"]
+
         try:
             cursor.execute(insert_anime_stmt, data)
         except:
+            print "Error"
             pass
 
         #anime_genre_bridge = ('')

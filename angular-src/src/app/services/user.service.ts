@@ -10,7 +10,7 @@ export class UserService {
 
 
   getAnime(title) {
-      return this.http.post('/api/anime', {title:title})
+      return this.http.get('/api/user/' + title)
           .map(res => res.json());
   }
 }
