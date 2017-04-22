@@ -5,7 +5,7 @@ const request = require('request');
 const xmlParser = require('xml2js').parseString;
 
 exports.getUserInfo = (username, mediaType, callback) => {
-    let url = util.format('https://www.myanimelist.net/malappinfo.php?u=%s&type=%s', username, mediaType);
+    let url = util.format('https://www.myanimelist.net/malappinfo.php?u=%s&type=%s&status=all', username, mediaType);
     request(url, (error, response, body) => {
         if (response.statusCode == 200) {
             xmlParser(body, {explicitArray : false, ignoreAttrs : true}, (err, result) => {
@@ -32,7 +32,7 @@ exports.addOrUpdateUser = (userInfo) => {
             let values = [];
             let insertUpdate = '';
             if (!rows.length) {
-                base = 'INSERT INTO user (mal_id, username, watching, completed, onhold, dropped, planned, days_watching) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+                base = 'INSERT INTO user (mal_id, username, watching, an_completed, an_onhold, an_dropped, an_planned, an_days) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
                 values = [
                     userInfo.user_id,
                     userInfo.user_name,
@@ -44,7 +44,7 @@ exports.addOrUpdateUser = (userInfo) => {
                     userInfo.user_days_spent_watching
                 ];
             } else {
-                base = 'UPDATE user SET username = ?, watching = ?, completed = ?, onhold = ?, dropped = ?, planned = ?, days_watching = ? WHERE mal_id = ?';
+                base = 'UPDATE user SET username = ?, watching = ?, an_completed = ?, an_onhold = ?, an_dropped = ?, an_planned = ?, an_days = ? WHERE mal_id = ?';
                 values = [
                     userInfo.user_name,
                     userInfo.user_watching,

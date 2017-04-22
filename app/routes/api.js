@@ -28,17 +28,17 @@ router.post('/anime', (req, res, next) => {
 router.get('/user/:username', (req, res, next) => {
     console.log('Getting user: ' + req.params.username);
     userProcessor.getUserInfo(req.params.username, '', (err, result) => {
-        if (!err) console.log(result);
+        if (!err) console.log(result.myanimelist.anime.length);
     });
     res.json("Awwwwwwww yiss");
 });
 
-router.get('/user/:username/anime', (req, res, next) => {
-
+router.get('/user/:username/animestats', (req, res, next) => {
+    res.json("Testing animestats endpoint");
 });
 
-router.get('/user/:username/manga', (req, res, next) => {
-    
+router.get('/user/:username/mangastats', (req, res, next) => {
+    res.json("Testing mangastats endpoint");
 });
 
 module.exports = router;
