@@ -9,60 +9,65 @@ exports.getUserInfo = (username, mediaType, callback) => {
     request(url, (error, response, body) => {
         if (response.statusCode == 200) {
             xmlParser(body, {explicitArray : false, ignoreAttrs : true}, (err, result) => {
-                callback(null, result);      
+                this.addOrUpdateUser(result.myanimelist.myinfo, mediaType)
+                callback(false, result.myanimelist);      
             });
         } else {
-            callback("Failure", null)
+            callback(true, 'Unable to retrieve the profile from MAL');
         }
     });
 }
 
-exports.addOrUpdateUser = (userInfo) => {
+exports.addOrUpdateUser = (userInfo, mediaType) => {
+
+    checkUserExists(userInfo.user_id, (exists) => {
+        console.log(exists);
+        let base = '';
+        let values = [];
+        let insertUpdate = '';
+        if (!exists) {
+            base = 'INSERT INTO user (username, %s_current, %s_completed, %s_onhold, %s_dropped, %s_planned, %s_days, mal_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+        } else {
+            base = 'UPDATE user SET username = ?, %s_current = ?, %s_completed = ?, %s_onhold = ?, %s_dropped = ?, %s_planned = ?, %s_days = ? WHERE mal_id = ?';
+        }
+
+        let current = (mediaType == 'anime' ? userInfo.user_watching : userInfo.user_reading);
+        let planned = (mediaType == 'anime' ? userInfo.user_plantowatch : userInfo.user_plantoread);
+
+        values = [
+            userInfo.user_name,
+            current,
+            userInfo.user_completed,
+            userInfo.user_onhold,
+            userInfo.user_dropped,
+            planned,
+            userInfo.user_days_spent_watching,
+            userInfo.user_id
+        ];
+        // Dumb formatting method I have to use
+        base = util.format(base, mediaType, mediaType, mediaType, mediaType, mediaType, mediaType);
+        insertUpdate = mysql.format(base, values);
+        db.get().query(insertUpdate, (err) => {
+            if (err) {
+                console.log(err);
+                success = false;
+            }
+        });
+    });        
+}
+
+checkUserExists = (userID, callback) => {
     let check = "SELECT * FROM user WHERE mal_id = ?";
-    let vals = [userInfo.user_id];
+    let vals = [userID];
     let checkQuery = mysql.format(check, vals);
-    let success = true;
+    let result = false;
 
     db.get().query(checkQuery, (err, rows) => {
         if (err) {
             console.log(err);
-            success = false;
         } else {
-            let base = '';
-            let values = [];
-            let insertUpdate = '';
-            if (!rows.length) {
-                base = 'INSERT INTO user (mal_id, username, watching, an_completed, an_onhold, an_dropped, an_planned, an_days) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-                values = [
-                    userInfo.user_id,
-                    userInfo.user_name,
-                    userInfo.user_watching,
-                    userInfo.user_completed,
-                    userInfo.user_onhold,
-                    userInfo.user_dropped,
-                    userInfo.user_plantowatch,
-                    userInfo.user_days_spent_watching
-                ];
-            } else {
-                base = 'UPDATE user SET username = ?, watching = ?, an_completed = ?, an_onhold = ?, an_dropped = ?, an_planned = ?, an_days = ? WHERE mal_id = ?';
-                values = [
-                    userInfo.user_name,
-                    userInfo.user_watching,
-                    userInfo.user_completed,
-                    userInfo.user_onhold,
-                    userInfo.user_dropped,
-                    userInfo.user_plantowatch,
-                    userInfo.user_days_spent_watching,
-                    userInfo.user_id
-                ];
-            }
-            insertUpdate = mysql.format(base, values);
-            db.get().query(insertUpdate, (err) => {
-                if (err) {
-                    console.log(err);
-                    success = false;
-                }
-            });
+            if (rows.length) result = true;
         }
+        callback(result);
     });
 }

@@ -15,7 +15,6 @@ export class UserComponent implements OnInit {
 
   ngOnInit() {
       this.userService.getAnime(this.route.snapshot.params['name']).subscribe(anime => {
-        console.log(anime[0]);
         this.allAnime = JSON.stringify(anime);
       });
   }
