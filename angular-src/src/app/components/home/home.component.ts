@@ -19,7 +19,7 @@ export class HomeComponent implements OnInit {
   }
 
   onNameSubmit() {
-      this.router.navigate(['/user/'+this.username]);
+      this.router.navigate(['/user', this.username]);
   }
 
 }

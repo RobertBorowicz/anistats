@@ -9,6 +9,7 @@ import { NavbarComponent } from './components/navbar/navbar.component';
 import { LoginComponent } from './components/login/login.component';
 import { HomeComponent } from './components/home/home.component';
 import { UserComponent } from './components/user/user.component';
+import { SpinnerComponent } from './components/spinner/spinner.component';
 
 import { UserService } from './services/user.service';
 
@@ -24,7 +25,8 @@ const appRoutes : Routes = [
     NavbarComponent,
     LoginComponent,
     HomeComponent,
-    UserComponent
+    UserComponent,
+    SpinnerComponent
   ],
   imports: [
     BrowserModule,

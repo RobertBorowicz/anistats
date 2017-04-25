@@ -1,3 +1,10 @@
 <div class="container">
-    <h1>{{allAnime}}</h1>
+    <h1>All Manga</h1>
+    <app-spinner [loading]="loading"></app-spinner>
+    <ul>
+        <li *ngFor="let manga of allAnime">
+            <a target="_blank" href="https://myanimelist.net/manga/{{manga.series_mangadb_id}}">{{manga.series_title}}</a>
+            <p>My score: {{manga.my_score}}</p>
+        </li>
+    </ul>
 </div>
