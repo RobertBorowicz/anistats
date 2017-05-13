@@ -9,8 +9,8 @@ export class UserService {
   constructor(private http:Http) { }
 
 
-  getAnime(title) {
-      return this.http.get('http://localhost:8080/api/user/' + title)
+  getAnime(title, type) {
+      return this.http.get('http://localhost:8080/api/user/' + title + '/' + type)
           .map(res => res.json());
   }
 }

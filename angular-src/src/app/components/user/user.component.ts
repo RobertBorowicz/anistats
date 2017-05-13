@@ -9,18 +9,21 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class UserComponent implements OnInit {
 
-  allAnime: any;
+  allMedia: any;
   loading: boolean = false;
+  currUser: string;
 
   constructor(private userService: UserService, private route: ActivatedRoute) { }
 
   ngOnInit() {
     this.loading = true;
-      this.userService.getAnime(this.route.snapshot.params['name']).subscribe(anime => {
-        this.allAnime = anime.manga;
-        console.log(anime.manga);
-        this.loading = false;
-      }, () => this.loading = false);
+    this.currUser = this.route.snapshot.params['name'];
+
+    this.userService.getAnime(this.currUser, 'anime').subscribe(media => {
+      this.allMedia = media.list;
+      console.log(media.list);
+      this.loading = false;
+    }, () => this.loading = false);
   }
 }
 

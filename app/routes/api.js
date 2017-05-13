@@ -25,8 +25,19 @@ router.post('/anime', (req, res, next) => {
     });
 });
 
-router.get('/user/:username', (req, res, next) => {
-    console.log('Getting user: ' + req.params.username);
+router.get('/user/:username/anime', (req, res, next) => {
+    console.log('Getting anime for user: ' + req.params.username);
+    userProcessor.getUserInfo(req.params.username, 'anime', (err, result) => {
+        if (!err) {
+            res.json(result);
+        } else {
+            console.log(result);
+        }
+    });
+});
+
+router.get('/user/:username/manga', (req, res, next) => {
+    console.log('Getting manga for user: ' + req.params.username);
     userProcessor.getUserInfo(req.params.username, 'manga', (err, result) => {
         if (!err) {
             res.json(result);

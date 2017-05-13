@@ -1,13 +1,13 @@
 var config = {};
 
-config.database = {};
+config.mysql = {};
 config.server = {};
 
-config.database.host = 'localhost'
-config.database.user = 'root'
-config.database.password = ''
-config.database.production = ''
-config.database.test = ''
+config.mysql.host = 'localhost'
+config.mysql.user = 'root'
+config.mysql.password = ''
+config.mysql.production = ''
+config.mysql.test = ''
 
 config.server.port = 3000
 

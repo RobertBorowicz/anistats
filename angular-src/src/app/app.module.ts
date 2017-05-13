@@ -14,9 +14,9 @@ import { SpinnerComponent } from './components/spinner/spinner.component';
 import { UserService } from './services/user.service';
 
 const appRoutes : Routes = [
-  {path:'', component: HomeComponent},
-  {path:'login', component: LoginComponent},
-  {path:'user/:name', component: UserComponent}
+  {path: '',           component: HomeComponent},
+  {path: 'login',      component: LoginComponent},
+  {path: 'user/:name', component: UserComponent}
 ];
 
 @NgModule({
