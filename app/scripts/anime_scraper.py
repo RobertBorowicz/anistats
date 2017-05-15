@@ -1,10 +1,9 @@
 import sys
 import requests
 from bs4 import BeautifulSoup
-import mysql.connector
-from dbconfig import config
 import re
 import time
+from media_database import MALMediaDatabase
 
 # cnx = mysql.connector.connect(**config)
 
@@ -20,31 +19,26 @@ import time
 '''
 Currently not doing any error handling
 Will fix before implementing into malstats
-'''
-class MALAnimeScraper():
 
-    def __init__(self, animeID):
+Also decided to merge everything into a single scraper
+This makes the file much longer, but there are redundant pieces of 
+code between the manga and anime scrapers. I pass the media type and 
+full list of IDs from NodeJS, so I can handle everything regarding which 
+tables and scraper functions to use
+'''
+class MALMediaScraper():
+
+    def __init__(self, mediaType, allIDs):
         # soup is the backbone for all class methods
         # this should be an instance of BeautifulSoup()
         self.soup = None
-        self.id = animeID
-        self.url = 'https://myanimelist.net/anime/' + animeID
-        self.update_soup()
+        self.ids = allIDs
+        self.media = mediaType
+        self.url = 'https://myanimelist.net/%s/' % mediaType
+        self.database = MALMediaDatabase()
+        # self.update_soup()
 
-    def update_soup(self):
-        res = requests.get(self.url)
-        if not res.ok:
-            print 'Error getting the requested anime'
-            return
-        self.soup = BeautifulSoup(res.content, 'html.parser')
-
-    def set_animeID_and_update(self, animeID):
-        self.id = animeID
-        self.url = 'https://myanimelist.net/anime/' + animeID
-        self.update_soup()
-
-    def scrape_anime(self):
-        descriptor = {
+        self.animeDescriptor = {
             'Type'      : self.get_type,
             'Title'     : self.get_title,
             'Title_JP'  : self.get_title_jp,
@@ -63,20 +57,64 @@ class MALAnimeScraper():
             'Favorites' : self.get_favorites
         }
 
-        for key, function in descriptor.items():
-            descriptor[key] = function()
+        self.mangaDescriptor = {
+            'Type'        : self.get_type,
+            'Title'       : self.get_title,
+            'Title_JP'    : self.get_title_jp,
+            'Title_EN'    : self.get_title_en,
+            'Chapters'    : self.get_chapters,
+            'Status'      : self.get_status,
+            'Volumes'     : self.get_volumes,
+            'Authors'     : self.get_authors,
+            'Serial'      : self.get_serialization,
+            'Genres'      : self.get_genres,
+            'Score'       : self.get_score_as_float,
+            'Members'     : self.get_members,
+            'Favorites'   : self.get_favorites,
+            'Relations'   : self.get_all_relations
+        }
 
-        descriptor['Timestamp'] = time.ctime()
-        descriptor['ID'] = self.id
+    def update_soup(self, newID):
+        res = requests.get(self.url + str(newID))
+        if not res.ok:
+            print 'Error getting the requested anime'
+            return
+        self.soup = BeautifulSoup(res.content, 'html.parser')
 
-        return descriptor
+    def set_animeID_and_update(self, animeID):
+        self.id = animeID
+        self.url = 'https://myanimelist.net/anime/' + animeID
+        self.update_soup()
+
+    def scrape_media(self):
+        descriptor = self.animeDescriptor if self.media == 'anime' else self.mangaDescriptor
+
+        print self.ids
+
+        for i in self.ids:
+            # Check if the record exists in the database before scraping
+            # if not self.database.exists(self.media, i)
+
+            # self.update_soup(i)
+
+            # for key, function in descriptor.items():
+            #     descriptor[key] = function()
+
+            # descriptor['Timestamp'] = time.ctime()
+            # descriptor['ID'] = self.id
+            # yield descriptor
+            print i
+            sys.stdout.flush()
+            time.sleep(.01)
+
+        return None
 
     def get_type(self):
         tag = self.soup.find('span', string='Type:')
-        anime_type = None
+        media_type = None
         if tag:
-            anime_type = tag.find_next_sibling('a').string
-        return anime_type
+            media_type = tag.find_next_sibling('a').string
+        return media_type
 
     def get_title(self):
         tag = self.soup.find('span', itemprop='name')
@@ -114,6 +152,17 @@ class MALAnimeScraper():
                 print "Unable to correctly parse episodes"
         return 0
 
+    def get_chapters(self):
+        tag = self.soup.find('span', string='Chapters:')
+        if tag:
+            chaps = tag.next_sibling.encode('utf8')
+            try:
+                chaps = int(chaps.strip())
+                return chaps
+            except:
+                print "Unable to correctly parse chapters"
+        return 0
+
     def get_status(self):
         tag = self.soup.find('span', string='Status:')
         status = None
@@ -131,6 +180,55 @@ class MALAnimeScraper():
             date, season = next_tag.string.strip().split(' ')
             prem = (date, season)
         return prem
+
+    def get_volumes(self):
+        tag = self.soup.find('span', string='Volumes:')
+        if tag:
+            vols = tag.next_sibling.encode('utf8')
+            try:
+                vols = int(vols.strip())
+                return vols
+            except:
+                print "Unable to correctly parse volumes"
+        return 0
+
+    def get_authors(self):
+        mainTag = self.soup.find('span', string='Authors:')
+        siblingTags = mainTag.find_next_siblings('a')
+        authors = []
+        pattern = re.compile('/people/([0-9]+)')
+        if not siblingTags:
+            print 'Failure retrieving authors'
+        else:
+            for sib in siblingTags:
+                m = re.match(pattern, sib['href'])
+                auth_id = 0
+                try:
+                    auth_id = int(m.group(1))
+                except:
+                    pass
+                authors.append((auth_id, sib.string))
+
+        return authors
+
+    def get_serialization(self):
+        mainTag = self.soup.find('span', string='Serialization:')
+        siblingTags = mainTag.find_next_siblings('a')
+        serial = []
+        pattern = re.compile('/manga/magazine/([0-9]+)')
+        if not siblingTags:
+            print 'Failure retrieving genres'
+        else:
+            for sib in siblingTags:
+                m = re.match(pattern, sib['href'])
+                ser_id = 0
+                try:
+                    ser_id = int(m.group(1))
+                except:
+                    pass
+                serial.append((ser_id, sib.string))
+
+        return serial
 
     def get_producers(self):
         mainTag = self.soup.find('span', string='Producers:')
@@ -181,7 +279,7 @@ class MALAnimeScraper():
     def get_genres(self):
         tags = self.soup(href=re.compile('genre'))
         genres = []
-        pattern = re.compile('/anime/genre/([0-9]+)')
+        pattern = re.compile('/%s/genre/([0-9]+)' % self.media)
         if not tags:
             print 'Failure retrieving genres'
         else:
@@ -244,6 +342,34 @@ class MALAnimeScraper():
                 pass
         return favs
 
+    def get_all_relations(self):
+        table = self.soup.find('table', {'class':'anime_detail_related_anime'})
+        data = table.find_all('td')
+        relations = {}
+        animePattern = re.compile('/anime/([0-9]+)')
+        mangaPattern = re.compile('/manga/([0-9]+)')
+        currKey = ''
+        for d in data:
+            try:
+                if d.string and d.string in self.relatedStrings:
+                    currKey = d.string.replace(':', '')
+                    relations[currKey] = []
+                else:
+                    if currKey == "Adaptation":
+                        p = animePattern
+                    else:
+                        p = mangaPattern
+                    for link in d.find_all('a'):
+                        m = re.match(p, link['href'])
+                        relatedID = int(m.group(1))
+                        relations[currKey].append(relatedID)
+
+            except:
+                print 'Error'
+                pass
+            # print d.find_all('a')
+        return relations
+
     def __parse_duration(self, text):
         pattern = re.compile('([\d]+)\D+(?:(\d+))?')
         m = re.match(pattern, text)
@@ -260,61 +386,30 @@ class MALAnimeScraper():
 
         return total
 
-class AnimeDatabase():
-
-    def __init__(self):
-        self.cnx = mysql.connector.connect(**config)
-        self.validKeys = [
-            'ID',
-            'Type',
-            'Title',
-            'Title_JP',
-            'Title_EN',
-            'Episodes',
-            'Status',
-            'Premier',
-            'Producers',
-            'Studios',
-            'Source',
-            'Genres',
-            'Duration',
-            'Rating',
-            'Score',
-            'Members',
-            'Favorites',
-            'Timestamp'
-        ]
-
-    def insert_record(self, d):
-        cursor = self.cnx.cursor(prepared=True)
-
-        insert_anime_stmt = ('INSERT INTO anime ('
-                'anime_id, title, title_jp, title_en, status, type, premier_season, '
-                'premier_year, episodes, duration, score, rating, members, favorites) '
-                'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)')
-
-        data = (d['ID'], d['Title'], d['Title_JP'], d['Title_EN'],
-                d['Status'], d['Type'], d['Premier'][0], d['Premier'][1],
-                d['Episodes'], d['Duration'], d['Score'], d['Rating'],
-                d['Members'], d['Favorites'])
-
-        print d["Timestamp"]
-
-        try:
-            cursor.execute(insert_anime_stmt, data)
-        except:
-            print "Error"
-            pass
-
-        #anime_genre_bridge = ('')
-
-        self.cnx.commit()
+    def check(self):
+        curr_time = int(time.time())
+        exists, timestamp = self.database.exists('anime', 22729)
+        time_since = (curr_time - timestamp) / 86400.0
+        if (not exists or time_since > 14):
+            print "Need to add"
+        else:
+            print "All good"
 
 def main(args):
-    anime = MALAnimeScraper(args[1])
-    anime_data = anime.scrape_anime()
-    db = AnimeDatabase()
-    db.insert_record(anime_data)
+    # anime = MALAnimeScraper(args[1])
+    # anime_data = anime.scrape_anime()
+    scraper = MALMediaScraper('anime', [1,2,3])
+    scraper.check()
+    # db.insert_record(anime_data)
+    # mediaType = args[1]
+    # allIDs = [int(x) for x in args[2].split(',')]
+
+    # print mediaType
+    
+    # scraper = MALMediaScraper(mediaType, allIDs)
+    # scraper.scrape_media()
+
+    # print allIDs
 
 if __name__ == '__main__':
     main(sys.argv)

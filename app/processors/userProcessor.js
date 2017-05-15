@@ -28,7 +28,6 @@ exports.getUserInfo = (username, mediaType, callback) => {
 exports.addOrUpdateUser = (userInfo, mediaType) => {
 
     checkUserExists(userInfo.user_id, (exists) => {
-        console.log(exists);
         let base = '';
         let values = [];
         let insertUpdate = '';
