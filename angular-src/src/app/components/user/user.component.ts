@@ -12,6 +12,7 @@ export class UserComponent implements OnInit {
   userInfo: any;
   loading: boolean = false;
   currUser: string;
+  showAnime: boolean = true;
 
   constructor(private userService: UserService, private route: ActivatedRoute) { }
 
@@ -21,9 +22,16 @@ export class UserComponent implements OnInit {
 
     this.userService.getBasicUserInfo(this.currUser).subscribe(media => {
       this.userInfo = media;
-      console.log(media.anime);
       this.loading = false;
     }, () => this.loading = false);
+  }
+
+  selectMangaSource(): void {
+    this.showAnime = false;
+  }
+
+  selectAnimeSource(): void {
+    this.showAnime = true;
   }
 }
 

@@ -26,8 +26,8 @@ exports.stripAllMedia = (mediaType, mediaList, callback) => {
         media = {
             id : (isAnime) ? curr.series_animedb_id : curr.series_mangadb_id,
             title : curr.series_title,
-            user_score : curr.my_score,
-            user_status : convertStatus(curr.my_status),
+            user_score : parseInt(curr.my_score),
+            user_status : curr.my_status,
             type : mediaType
         };
         mediaIDs.push(media.id);
