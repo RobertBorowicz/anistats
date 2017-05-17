@@ -1,10 +1,11 @@
 <div class="container">
     <h1>Info for '{{currUser}}'</h1>
     <app-spinner [showSpinner]="loading"></app-spinner>
-    <ul>
-        <li *ngFor="let media of allMedia">
+    <ul *ngIf="userInfo">
+        <li *ngFor="let media of userInfo.manga">
             <a target="_blank" href="https://myanimelist.net/{{media.type}}/{{media.id}}">{{media.title}}</a>
             <p>My score: {{media.user_score}}</p>
+            <p>My status: {{media.user_status}}</p>
         </li>
     </ul>
 </div>

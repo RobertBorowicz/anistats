@@ -9,7 +9,7 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class UserComponent implements OnInit {
 
-  allMedia: any;
+  userInfo: any;
   loading: boolean = false;
   currUser: string;
 
@@ -19,15 +19,16 @@ export class UserComponent implements OnInit {
     this.loading = true;
     this.currUser = this.route.snapshot.params['name'];
 
-    this.userService.getAnime(this.currUser, 'anime').subscribe(media => {
-      this.allMedia = media.list;
-      console.log(media.list);
+    this.userService.getBasicUserInfo(this.currUser).subscribe(media => {
+      this.userInfo = media;
+      console.log(media.anime);
       this.loading = false;
     }, () => this.loading = false);
   }
 }
 
-interface Anime {
-  anime_id: number;
-  title: String;
+interface UserInfo {
+  user: any,
+  anime: any,
+  manga: any
 }

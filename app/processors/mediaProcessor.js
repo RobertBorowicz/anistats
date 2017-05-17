@@ -27,7 +27,7 @@ exports.stripAllMedia = (mediaType, mediaList, callback) => {
             id : (isAnime) ? curr.series_animedb_id : curr.series_mangadb_id,
             title : curr.series_title,
             user_score : curr.my_score,
-            user_status : curr.my_status,
+            user_status : convertStatus(curr.my_status),
             type : mediaType
         };
         mediaIDs.push(media.id);
@@ -35,9 +35,27 @@ exports.stripAllMedia = (mediaType, mediaList, callback) => {
     }
 
     mediaIDs.map(String);
-    executePython(mediaType, mediaIDs);
+    //executePython(mediaType, mediaIDs);
 
     callback(strippedMediaList);
+}
+
+convertStatus = (status) => {
+    switch(status) {
+        case '1':
+            return "Currently Watching";
+        case '2':
+            return "Completed";
+        case '3':
+            return "On Hold";
+        case '4':
+            return "Dropped";
+        case '6':
+            return "Plan to Watch";
+        default:
+            return "None";
+            break;
+    }
 }
 
 // exports.stripMangaList = (mangaList, callback) => {

@@ -25,26 +25,37 @@ router.post('/anime', (req, res, next) => {
     });
 });
 
-router.get('/user/:username/anime', (req, res, next) => {
-    console.log('Getting anime for user: ' + req.params.username);
-    userProcessor.getUserInfo(req.params.username, 'anime', (err, result) => {
+router.get('/user/:username', (req, res, next) => {
+    console.log('Getting full user info for: ' + req.params.username);
+    userProcessor.getFullUserInfo(req.params.username, (err, data) => {
         if (!err) {
-            res.json(result);
+            res.json(data);
         } else {
-            console.log(result);
+            console.log('Error: ' + data);
         }
     });
+})
+
+router.get('/user/:username/anime', (req, res, next) => {
+    console.log('Getting anime for user: ' + req.params.username);
+    // userProcessor.getUserInfo(req.params.username, 'anime', (err, result) => {
+    //     if (!err) {
+    //         res.json(result);
+    //     } else {
+    //         console.log(result);
+    //     }
+    // });
 });
 
 router.get('/user/:username/manga', (req, res, next) => {
     console.log('Getting manga for user: ' + req.params.username);
-    userProcessor.getUserInfo(req.params.username, 'manga', (err, result) => {
-        if (!err) {
-            res.json(result);
-        } else {
-            console.log(result);
-        }
-    });
+    // userProcessor.getUserInfo(req.params.username, 'manga', (err, result) => {
+    //     if (!err) {
+    //         res.json(result);
+    //     } else {
+    //         console.log(result);
+    //     }
+    // });
 });
 
 router.get('/user/:username/animestats', (req, res, next) => {
