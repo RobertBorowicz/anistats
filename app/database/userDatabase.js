@@ -9,9 +9,9 @@ exports.addOrUpdateUser = (userInfo, mediaType) => {
         let values = [];
         let insertUpdate = '';
         if (!exists) {
-            base = 'INSERT INTO user (username, %s_current, %s_completed, %s_onhold, %s_dropped, %s_planned, %s_days, mal_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+            base = 'INSERT INTO users (username, %s_current, %s_completed, %s_onhold, %s_dropped, %s_planned, %s_days, mal_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
         } else {
-            base = 'UPDATE user SET username = ?, %s_current = ?, %s_completed = ?, %s_onhold = ?, %s_dropped = ?, %s_planned = ?, %s_days = ? WHERE mal_id = ?';
+            base = 'UPDATE users SET username = ?, %s_current = ?, %s_completed = ?, %s_onhold = ?, %s_dropped = ?, %s_planned = ?, %s_days = ? WHERE mal_id = ?';
         }
 
         let current = (mediaType == 'anime' ? userInfo.user_watching : userInfo.user_reading);
@@ -39,10 +39,21 @@ exports.addOrUpdateUser = (userInfo, mediaType) => {
     });        
 }
 
+exports.retrieveUserMedia = (userID, mediaType, callback) => {
+    let stmt = "SELECT * FROM media WHERE media_type = ?"
+}
+
+exports.deleteUser = (username, callback) => {
+    let stmt = "DELETE FROM users WHERE username = ?";
+    let query = mysql.format(stmt, [username]);
+    db.get().query(query, (err, rows) => {
+        callback(err);
+    });
+}
+
 exports.checkUserExists = (userID, callback) => {
-    let check = "SELECT * FROM user WHERE mal_id = ?";
-    let vals = [userID];
-    let checkQuery = mysql.format(check, vals);
+    let check = "SELECT * FROM users WHERE mal_id = ?";
+    let checkQuery = mysql.format(check, [userID]);
     let result = false;
 
     db.get().query(checkQuery, (err, rows) => {
@@ -52,5 +63,25 @@ exports.checkUserExists = (userID, callback) => {
             if (rows.length) result = true;
         }
         callback(result);
+    });
+}
+
+exports.checkUsernameExists = (username, callback) => {
+    let stmt = "SELECT mal_id FROM users WHERE username = ?";
+    let query = mysql.format(stmt, [username]);
+    let error = false;
+    let exists = false;
+
+    db.get().query(query, (err, rows) => {
+        let id = 0;
+        if (err) {
+            error = true;
+        } else {
+            if (rows.length) {
+                exists = true;
+                id = rows[0].mal_id;
+            }
+        }
+        callback(error, exists, id);
     });
 }

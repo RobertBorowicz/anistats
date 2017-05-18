@@ -26,6 +26,26 @@ exports.getFullUserInfo = (username, callback) => {
 }
 
 exports.getUserMedia = (username, mediaType, callback) => {
+    userDB.checkUsernameExists(username, (err, exists, userID) => {
+        if (exists) {
+            // Pull directly from the database if we have user info
+            userDB.retrieveUserMedia(userID, mediaType, (error, result) => {
+                callback(error, result);
+            });
+        } else {
+            // We need to fetch the user info and update database with any missing media
+            callback(true, null);
+        }
+    });
+}
+
+exports.updateUser = (username, callback) => {
+    userDB.deleteUser(username, (err) => {
+
+    });
+}
+
+getAndParseExternalUser = (username, mediaType, callback) => {
     let url = util.format(malURL, username, mediaType);
     request(url, (error, response, body) => {
         if (!error && response.statusCode == 200) {

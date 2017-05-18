@@ -35,7 +35,7 @@ exports.stripAllMedia = (mediaType, mediaList, callback) => {
     }
 
     mediaIDs.map(String);
-    //executePython(mediaType, mediaIDs);
+    executePython(mediaType, mediaIDs);
 
     callback(strippedMediaList);
 }

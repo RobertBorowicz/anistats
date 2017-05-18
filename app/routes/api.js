@@ -12,19 +12,6 @@ router.get('/anime', (req, res, next) => {
     });
 });
 
-router.post('/anime', (req, res, next) => {
-    console.log("Post");
-    let title = req.body.title;
-    let stmt = "SELECT * FROM ?? WHERE ?? = ?";
-    let inserts = ['anime', 'title', title]
-    const query = mysql.format(stmt, inserts)
-    console.log(query);
-    db.get().query(query, (err, rows) => {
-        console.log(rows);
-        res.json(rows);
-    });
-});
-
 router.get('/user/:username', (req, res, next) => {
     console.log('Getting full user info for: ' + req.params.username);
     userProcessor.getFullUserInfo(req.params.username, (err, data) => {
@@ -38,13 +25,13 @@ router.get('/user/:username', (req, res, next) => {
 
 router.get('/user/:username/anime', (req, res, next) => {
     console.log('Getting anime for user: ' + req.params.username);
-    // userProcessor.getUserInfo(req.params.username, 'anime', (err, result) => {
-    //     if (!err) {
-    //         res.json(result);
-    //     } else {
-    //         console.log(result);
-    //     }
-    // });
+    userProcessor.getUserMedia(req.params.username, 'anime', (err, result) => {
+        if (!err) {
+            res.json(result);
+        } else {
+            console.log(result);
+        }
+    });
 });
 
 router.get('/user/:username/manga', (req, res, next) => {
@@ -65,5 +52,18 @@ router.get('/user/:username/animestats', (req, res, next) => {
 router.get('/user/:username/mangastats', (req, res, next) => {
     res.json("Testing mangastats endpoint");
 });
+
+// router.post('/anime', (req, res, next) => {
+//     console.log("Post");
+//     let title = req.body.title;
+//     let stmt = "SELECT * FROM ?? WHERE ?? = ?";
+//     let inserts = ['anime', 'title', title]
+//     const query = mysql.format(stmt, inserts)
+//     console.log(query);
+//     db.get().query(query, (err, rows) => {
+//         console.log(rows);
+//         res.json(rows);
+//     });
+// });
 
 module.exports = router;
