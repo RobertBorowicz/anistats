@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../../db');
+const db = require('../database/db');
 const mysql = require('mysql');
 const request = require('request');
 const xmlParser = require('xml2js').parseString;

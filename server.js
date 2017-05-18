@@ -1,5 +1,5 @@
 // Local files
-const db = require('./db')
+const db = require('./app/database/db')
 const config = require('./config')
 
 const express = require('express')
@@ -11,6 +11,7 @@ const api = require('./app/routes/api')
 const app = express()
 
 const port = 8080;
+const dbMode = db.MODE_TEST;
 
 // View engine
 // app.set('views', __dirname + '/public');
@@ -23,7 +24,7 @@ app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended : false}));
 
-app.use(function(req, res, next) {
+app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
@@ -33,7 +34,7 @@ app.use(function(req, res, next) {
 app.use('/', index)
 app.use('/api', api)
 
-db.connect(db.MODE_TEST, (err) => {
+db.connect(dbMode, (err) => {
     if (err) {
         console.log(err);
         process.exit(1)

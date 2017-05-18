@@ -1,4 +1,4 @@
-const db = require('../../db');
+const db = require('./db');
 const mysql = require('mysql');
 const util = require('util');
 
